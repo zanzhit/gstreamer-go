@@ -3,9 +3,10 @@ package record
 import (
 	"fmt"
 	"os/exec"
+	"sync"
 )
 
-func Record(done chan struct{}, in Input) {
+func Record(done chan struct{}, in Input, wg *sync.WaitGroup) {
 	var commands []*exec.Cmd
 
 	inputs := in.Parse()
@@ -17,16 +18,17 @@ func Record(done chan struct{}, in Input) {
 		}
 	}
 
-	go stopRecord(&commands, done)
+	go stopRecord(&commands, done, wg)
 }
 
-func stopRecord(commands *[]*exec.Cmd, done chan struct{}) {
+func stopRecord(commands *[]*exec.Cmd, done chan struct{}, wg *sync.WaitGroup) {
 	<-done
+	defer wg.Done()
 
 	for i, cmd := range *commands {
 		if cmd.Process != nil {
 			cmd.Process.Kill()
-			fmt.Printf("Stream %d recording interrupted", i+1)
+			fmt.Printf("Stream %d recording interrupted\n", i+1)
 		}
 	}
 }

@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+	"sync"
 
 	"gst/record"
 	"gst/record/gsttxt"
 )
 
 func main() {
+	wg := new(sync.WaitGroup)
+
 	file := gsttxt.FileTXT{TXTPath: "urls.txt"}
 
 	done := make(chan struct{})
@@ -18,9 +21,10 @@ func main() {
 		close(done)
 	}()
 
-	record.Record(done, file)
+	wg.Add(1)
+	record.Record(done, file, wg)
 
-	<-done
+	wg.Wait()
 
 	fmt.Println("Программа завершена")
 }
