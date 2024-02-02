@@ -1,4 +1,4 @@
-package gstjson
+package parse
 
 import (
 	"encoding/json"
@@ -18,7 +18,7 @@ func readFile(fileName string) ([]byte, error) {
 	}
 
 	if !json.Valid(r) {
-		return nil, err
+		return nil, fmt.Errorf("invalid json")
 	}
 
 	return r, nil

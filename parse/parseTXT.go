@@ -1,4 +1,4 @@
-package gsttxt
+package parse
 
 import (
 	"bufio"

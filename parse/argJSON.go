@@ -1,4 +1,4 @@
-package gstjson
+package parse
 
 type Source struct {
 	VideoSource string `json:"videoSource"`

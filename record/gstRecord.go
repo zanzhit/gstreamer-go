@@ -20,7 +20,6 @@ func SingleRecord(inputs string, commands *[]*exec.Cmd, i int) error {
 		input := strings.Split(inputs, " ")
 		videoFile := input[0]
 		audioFile := input[1]
-
 		parametres := fmt.Sprintf("gst-launch-1.0 rtspsrc location=%s ! rtph264depay ! h264parse ! matroskamux name=mux ! filesink location=%s rtspsrc location=%s ! rtpmp4gdepay ! aacparse ! mux.", videoFile, outputFile, audioFile)
 		cmd, err := GstCommand(parametres, outputFile, i, commands)
 		if err != nil {
@@ -77,8 +76,6 @@ func connectionTest(parametres string, outputFile string, i int, commands *[]*ex
 		if cmd.Process != nil {
 			cmd.Process.Kill()
 		}
-
-		fmt.Printf("Recording the stream %d again\n", i+1)
 
 		_, err := GstCommand(parametres, outputFile, i, commands)
 		if err != nil {

@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"sync"
 
+	"gst/parse"
 	"gst/record"
-	"gst/record/gsttxt"
 )
 
 func main() {
 	wg := new(sync.WaitGroup)
 
-	file := gsttxt.FileTXT{TXTPath: "urls.txt"}
+	file := parse.FileJSON{JSONPath: "urls.json"}
 
 	done := make(chan struct{})
 

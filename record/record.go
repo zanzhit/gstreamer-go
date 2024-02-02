@@ -25,10 +25,11 @@ func stopRecord(commands *[]*exec.Cmd, done chan struct{}, wg *sync.WaitGroup) {
 	<-done
 	defer wg.Done()
 
-	for i, cmd := range *commands {
+	for _, cmd := range *commands {
 		if cmd.Process != nil {
 			cmd.Process.Kill()
-			fmt.Printf("Stream %d recording interrupted\n", i+1)
 		}
 	}
+
+	fmt.Println("Recording of all streams has stopped")
 }
