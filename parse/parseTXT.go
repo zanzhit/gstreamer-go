@@ -10,6 +10,7 @@ type FileTXT struct {
 	TXTPath string
 }
 
+// Opens and reads txt file line by line.
 func (f FileTXT) Parse() []string {
 	file, err := os.Open(f.TXTPath)
 	if err != nil {
