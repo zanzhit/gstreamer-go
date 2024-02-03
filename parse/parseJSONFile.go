@@ -11,6 +11,7 @@ type FileJSON struct {
 	JSONPath string
 }
 
+// Opens file.
 func readFile(fileName string) ([]byte, error) {
 	r, err := os.ReadFile(fileName)
 	if err != nil {
@@ -24,6 +25,7 @@ func readFile(fileName string) ([]byte, error) {
 	return r, nil
 }
 
+// Decodes the required json fields.
 func decodeJSON(f []byte) ([]string, error) {
 	var config Config
 	err := json.Unmarshal(f, &config)
@@ -40,6 +42,7 @@ func decodeJSON(f []byte) ([]string, error) {
 	return data, nil
 }
 
+// Combines file opening with json parsing.
 func (f FileJSON) Parse() []string {
 	file, err := readFile(f.JSONPath)
 	if err != nil {
