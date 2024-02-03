@@ -1,7 +1,6 @@
 package record
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -12,43 +11,35 @@ import (
 	"gst/output"
 )
 
+// Starts recording the line that was read and selects the required recording parameters.
 func SingleRecord(inputs string, commands *[]*exec.Cmd, i int) error {
 	outputFile := output.NameGenerate(i)
 
 	switch {
 	case strings.Contains(inputs, " "):
-		input := strings.Split(inputs, " ")
-		videoFile := input[0]
-		audioFile := input[1]
-		parametres := fmt.Sprintf("gst-launch-1.0 rtspsrc location=%s ! rtph264depay ! h264parse ! matroskamux name=mux ! filesink location=%s rtspsrc location=%s ! rtpmp4gdepay ! aacparse ! mux.", videoFile, outputFile, audioFile)
-		cmd, err := GstCommand(parametres, outputFile, i, commands)
+		cmd, parametres, err := TwoInputsArg(inputs, outputFile, i, commands)
 		if err != nil {
 			return err
 		}
 
-		go connectionTest(parametres, outputFile, i, commands, cmd)
-
-		return nil
-
-	case !strings.Contains(inputs, " "):
-		parametres := fmt.Sprintf("gst-launch-1.0 rtspsrc location=%s ! rtph264depay ! h264parse ! matroskamux ! filesink location=%s", inputs, outputFile)
-		cmd, err := GstCommand(parametres, outputFile, i, commands)
-		if err != nil {
-			return err
-		}
-
-		go connectionTest(parametres, outputFile, i, commands, cmd)
+		go ConnectionTest(parametres, outputFile, i, commands, cmd)
 
 		return nil
 
 	default:
-		err := errors.New("wrong input type")
+		cmd, parametres, err := SingleInputArg(inputs, outputFile, i, commands)
+		if err != nil {
+			return err
+		}
 
-		return err
+		go ConnectionTest(parametres, outputFile, i, commands, cmd)
+
+		return nil
 	}
 }
 
-func GstCommand(parametres string, outputFile string, i int, commands *[]*exec.Cmd) (*exec.Cmd, error) {
+// Generates and runs the gstreamer console command
+func gstCommand(parametres string, outputFile string, i int, commands *[]*exec.Cmd) (*exec.Cmd, error) {
 	c := strings.Split(parametres, " ")
 	cmd := exec.Command(c[0], c[1:]...)
 	*commands = append(*commands, cmd)
@@ -63,7 +54,8 @@ func GstCommand(parametres string, outputFile string, i int, commands *[]*exec.C
 	return cmd, err
 }
 
-func connectionTest(parametres string, outputFile string, i int, commands *[]*exec.Cmd, cmd *exec.Cmd) {
+// Checks if the file is being written using the file weight
+func ConnectionTest(parametres string, outputFile string, i int, commands *[]*exec.Cmd, cmd *exec.Cmd) {
 	time.Sleep(time.Second * 4)
 
 	fileInfo, err := os.Stat(outputFile)
@@ -77,7 +69,7 @@ func connectionTest(parametres string, outputFile string, i int, commands *[]*ex
 			cmd.Process.Kill()
 		}
 
-		_, err := GstCommand(parametres, outputFile, i, commands)
+		_, err := gstCommand(parametres, outputFile, i, commands)
 		if err != nil {
 			log.Printf("can't record %s\n", err)
 			return
